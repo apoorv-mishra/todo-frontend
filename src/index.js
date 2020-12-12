@@ -346,7 +346,7 @@ class Home extends React.Component {
       return response.json(); // parses JSON response into native JavaScript objects
     }
 
-    const data = await postData('http://localhost:8080/login', {
+    const data = await postData(`${process.env.REACT_APP_BASE_API_URL}/login`, {
       email: this.state.email,
       password: this.state.password 
     });
@@ -471,7 +471,7 @@ class SignUp extends React.Component {
       return response.json(); // parses JSON response into native JavaScript objects
     }
 
-    const data = await postData('http://localhost:8080/signup', {
+    const data = await postData(`${process.env.REACT_APP_BASE_API_URL}/signup`, {
       firstName: this.state.firstName,
       lastName: this.state.lastName,
       email: this.state.email,
