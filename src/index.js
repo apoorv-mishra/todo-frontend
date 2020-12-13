@@ -176,10 +176,8 @@ class TodoList extends React.Component {
     let todo = {
       id: this.state.todoList.length + 1,
       name: name,
-      done: false,
-      comments: []
     }
-    todoList.push(todo);
+    todoList.unshift(todo);
 
     this.setState({
       todoList,
