@@ -9,6 +9,8 @@ import {
   Redirect,
   Link,
 } from "react-router-dom";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 /* Structure of TodoApp */
 // <TodoApp>
@@ -29,8 +31,8 @@ import {
 
 function TodoItem(props) {
   return (
-    <li className="todo-item" key={props.id}>
-      <div className="checkbox">
+    <li className="d-flex flex-row justify-content-between bd-highlight mb-3 todo-item" key={props.id}>
+      <div className="p-2 bd-highlight checkbox">
 	<label className={props.done? "done": null}>
 	  <input
 	    type="checkbox"
@@ -41,9 +43,24 @@ function TodoItem(props) {
 	  {props.name}
 	</label>
       </div>
+      <div className="p-2 bd-highlight">
+	{
+	  props.done ?
+	    (
+	      props.deadline ?
+	      `Completed on ${props.deadline.getMonth() + 1}/${props.deadline.getDate()}/${props.deadline.getFullYear()}` : ""
+	    ):(
+	      <DatePicker
+		selected={props.deadline}
+		onChange={(date) => props.setTodoDeadline(props.id, date)}
+		isClearable
+		placeholderText="Set Deadline"
+	      />
+	    )
+	}
+      </div>
     </li>
   );
-
 }
 
 function TodoItems(props) {
@@ -53,7 +70,9 @@ function TodoItems(props) {
       id={item.id}
       name={item.name}
       done={item.done}
+      deadline={item.deadline}
       toggleTodoState={(id) => props.toggleTodoState(id)}
+      setTodoDeadline={(id, date) => props.setTodoDeadline(id, date)}
     />
   );
   return (
@@ -118,6 +137,7 @@ class AddTodo extends React.Component {
 	  <input
 	    type="text"
 	    name="name"
+	    className="add-todo-input"
 	    autoComplete="off"
 	    value={this.state.todo}
 	    placeholder="What needs to be done?"
@@ -142,6 +162,7 @@ class TodoList extends React.Component {
     this.displayCompletedTodos = this.displayCompletedTodos.bind(this);
     this.toggleTodoState = this.toggleTodoState.bind(this);
     this.refreshTodoList = this.refreshTodoList.bind(this);
+    this.setTodoDeadline = this.setTodoDeadline.bind(this);
   }
 
   async refreshTodoList() {
@@ -166,9 +187,48 @@ class TodoList extends React.Component {
     const data = await getData(`${process.env.REACT_APP_BASE_API_URL}/todos?userId=${JSON.parse(localStorage.getItem('user')).id}`);
     if (data.message === 'Todos!') {
       this.setState({
-	todoList: data.todos,
+	todoList: data.todos.map(t => {
+	  return {
+	    id: t.id,
+	    userId: t.userId,
+	    name: t.name,
+	    done: t.done,
+	    deadline: t.deadline ? new Date(t.deadline): null,
+	    createdAt: new Date(t.createdAt),
+	    updatedAt: new Date(t.updatedAt)
+	  }
+	}),
 	toDisplay: this.state.toDisplay
       });
+    }
+  }
+
+  async setTodoDeadline(id, deadline) {
+    async function patchData(url = '', data = {}) {
+      // Default options are marked with *
+      const response = await fetch(url, {
+	method: 'PATCH', // *GET, POST, PUT, DELETE, etc.
+	mode: 'cors', // no-cors, *cors, same-origin
+	cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+	credentials: 'same-origin', // include, *same-origin, omit
+	headers: {
+	  'Content-Type': 'application/json',
+	  'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}`
+	  // 'Content-Type': 'application/x-www-form-urlencoded',
+	},
+	redirect: 'follow', // manual, *follow, error
+	referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+	body: JSON.stringify(data) // body data type must match "Content-Type" header
+      });
+      return response.json(); // parses JSON response into native JavaScript objects
+    }
+
+    const data = await patchData(`${process.env.REACT_APP_BASE_API_URL}/todo/${id}/update?userId=${JSON.parse(localStorage.getItem('user')).id}`, {
+      deadline: deadline 
+    });
+
+    if (data.message === 'Todo updated!') {
+      await this.refreshTodoList();
     }
   }
 
@@ -249,7 +309,11 @@ class TodoList extends React.Component {
 	<div className="todo-list">
 	  <AddTodo refreshTodoList={this.refreshTodoList} />
 	  <hr />
-	  <TodoItems todoItems={todoItems} toggleTodoState={this.toggleTodoState}/>
+	  <TodoItems
+	    todoItems={todoItems}
+	    toggleTodoState={this.toggleTodoState}
+	    setTodoDeadline={this.setTodoDeadline}
+	  />
 	  <Footer
 	    activeTodosCount={this.state.todoList.filter(t => !t.done).length}
 	    displayAllTodos={this.displayAllTodos}
