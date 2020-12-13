@@ -105,7 +105,7 @@ class AddTodo extends React.Component {
       });
 
       if (data.message === 'Todo created!') {
-	this.props.addTodo(this.state.todo);
+	await this.props.refreshTodoList();
 	this.setState({ todo: '' });
       }
     }
@@ -141,9 +141,10 @@ class TodoList extends React.Component {
     this.displayActiveTodos = this.displayActiveTodos.bind(this);
     this.displayCompletedTodos = this.displayCompletedTodos.bind(this);
     this.toggleTodoState = this.toggleTodoState.bind(this);
+    this.refreshTodoList = this.refreshTodoList.bind(this);
   }
 
-  async componentDidMount() {
+  async refreshTodoList() {
     async function getData(url) {
       // Default options are marked with *
       const response = await fetch(url, {
@@ -171,18 +172,8 @@ class TodoList extends React.Component {
     }
   }
 
-  addTodo(name) {
-    let todoList = [...this.state.todoList];
-    let todo = {
-      id: this.state.todoList.length + 1,
-      name: name,
-    }
-    todoList.unshift(todo);
-
-    this.setState({
-      todoList,
-      toDisplay: this.state.toDisplay
-    });
+  async componentDidMount() {
+    await this.refreshTodoList();
   }
 
   displayAllTodos() {
@@ -206,18 +197,41 @@ class TodoList extends React.Component {
     });
   }
 
-  toggleTodoState(id) {
+  async toggleTodoState(id) {
+    async function patchData(url = '', data = {}) {
+      // Default options are marked with *
+      const response = await fetch(url, {
+	method: 'PATCH', // *GET, POST, PUT, DELETE, etc.
+	mode: 'cors', // no-cors, *cors, same-origin
+	cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+	credentials: 'same-origin', // include, *same-origin, omit
+	headers: {
+	  'Content-Type': 'application/json',
+	  'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}`
+	  // 'Content-Type': 'application/x-www-form-urlencoded',
+	},
+	redirect: 'follow', // manual, *follow, error
+	referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+	body: JSON.stringify(data) // body data type must match "Content-Type" header
+      });
+      return response.json(); // parses JSON response into native JavaScript objects
+    }
+
+    let todoToToggle;
     let todoList = [...this.state.todoList];
     for (let i = 0; i < todoList.length; i++) {
       if (todoList[i].id === id) {
-	todoList[i].done = !todoList[i].done;
+	todoToToggle = todoList[i];
       }
     }
 
-    this.setState({
-      todoList,
-      toDisplay: this.state.toDisplay
+    const data = await patchData(`${process.env.REACT_APP_BASE_API_URL}/todo/${id}/update?userId=${JSON.parse(localStorage.getItem('user')).id}`, {
+      done: !todoToToggle.done
     });
+
+    if (data.message === 'Todo updated!') {
+      await this.refreshTodoList();
+    }
   }
 
   render() {
@@ -233,7 +247,7 @@ class TodoList extends React.Component {
     return (
       <div className="todo-list-container">
 	<div className="todo-list">
-	  <AddTodo addTodo={this.addTodo.bind(this)}/>
+	  <AddTodo refreshTodoList={this.refreshTodoList} />
 	  <hr />
 	  <TodoItems todoItems={todoItems} toggleTodoState={this.toggleTodoState}/>
 	  <Footer
