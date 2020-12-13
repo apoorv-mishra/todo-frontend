@@ -27,33 +27,6 @@ import {
 // 	</TodoList>
 // </TodoApp>
 
-const todoList = [
-  {
-    id: 1,
-    name: 'Milk',
-    done: false,
-    comments: []
-  },
-  {
-    id: 2,
-    name: 'Water',
-    done: false,
-    comments: []
-  },
-  {
-    id: 3,
-    name: 'Cleaning',
-    done: false,
-    comments: []
-  },
-  {
-    id: 4,
-    name: 'Exercise',
-    done: false,
-    comments: []
-  }
-]
-
 function TodoItem(props) {
   return (
     <li className="todo-item" key={props.id}>
@@ -161,13 +134,41 @@ class TodoList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      todoList,
+      todoList: [],
       toDisplay: 'all'
     }
     this.displayAllTodos = this.displayAllTodos.bind(this);
     this.displayActiveTodos = this.displayActiveTodos.bind(this);
     this.displayCompletedTodos = this.displayCompletedTodos.bind(this);
     this.toggleTodoState = this.toggleTodoState.bind(this);
+  }
+
+  async componentDidMount() {
+    async function getData(url) {
+      // Default options are marked with *
+      const response = await fetch(url, {
+	method: 'GET', // *GET, POST, PUT, DELETE, etc.
+	mode: 'cors', // no-cors, *cors, same-origin
+	cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+	credentials: 'same-origin', // include, *same-origin, omit
+	headers: {
+	  'Content-Type': 'application/json',
+	  'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}`
+	  // 'Content-Type': 'application/x-www-form-urlencoded',
+	},
+	redirect: 'follow', // manual, *follow, error
+	referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      });
+      return response.json(); // parses JSON response into native JavaScript objects
+    }
+
+    const data = await getData(`${process.env.REACT_APP_BASE_API_URL}/todos?userId=${JSON.parse(localStorage.getItem('user')).id}`);
+    if (data.message === 'Todos!') {
+      this.setState({
+	todoList: data.todos,
+	toDisplay: this.state.toDisplay
+      });
+    }
   }
 
   addTodo(name) {
