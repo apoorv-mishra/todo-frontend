@@ -1,24 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import AddTodo from './AddTodo/AddTodo';
 import TodoItems from './TodoItems/TodoItems';
 import Footer from './Footer/Footer';
 
-class TodoList extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      todoList: [],
-      toDisplay: 'all'
-    }
-    this.displayAllTodos = this.displayAllTodos.bind(this);
-    this.displayActiveTodos = this.displayActiveTodos.bind(this);
-    this.displayCompletedTodos = this.displayCompletedTodos.bind(this);
-    this.toggleTodoState = this.toggleTodoState.bind(this);
-    this.refreshTodoList = this.refreshTodoList.bind(this);
-    this.setTodoDeadline = this.setTodoDeadline.bind(this);
-  }
+function TodoList(props) {
+  const [todoList, setTodoList] = useState([]);
+  const [toDisplay, setToDisplay] = useState('all');
 
-  async refreshTodoList() {
+  useEffect(() => {
+    async function refresh() {
+      await refreshTodoList()
+    }
+    refresh();
+  }, []);
+
+  async function refreshTodoList() {
     async function getData(url) {
       // Default options are marked with *
       const response = await fetch(url, {
@@ -39,24 +35,21 @@ class TodoList extends React.Component {
 
     const data = await getData(`${process.env.REACT_APP_BASE_API_URL}/todos?userId=${JSON.parse(localStorage.getItem('user')).id}`);
     if (data.message === 'Todos!') {
-      this.setState({
-	todoList: data.todos.map(t => {
-	  return {
-	    id: t.id,
-	    userId: t.userId,
-	    name: t.name,
-	    done: t.done,
-	    deadline: t.deadline ? new Date(t.deadline): null,
-	    createdAt: new Date(t.createdAt),
-	    updatedAt: new Date(t.updatedAt)
-	  }
-	}),
-	toDisplay: this.state.toDisplay
-      });
+      setTodoList(data.todos.map(t => {
+	return {
+	  id: t.id,
+	  userId: t.userId,
+	  name: t.name,
+	  done: t.done,
+	  deadline: t.deadline ? new Date(t.deadline): null,
+	  createdAt: new Date(t.createdAt),
+	  updatedAt: new Date(t.updatedAt)
+	}
+      }));
     }
   }
 
-  async setTodoDeadline(id, deadline) {
+  async function setTodoDeadline(id, deadline) {
     async function patchData(url = '', data = {}) {
       // Default options are marked with *
       const response = await fetch(url, {
@@ -81,36 +74,23 @@ class TodoList extends React.Component {
     });
 
     if (data.message === 'Todo updated!') {
-      await this.refreshTodoList();
+      await refreshTodoList();
     }
   }
 
-  async componentDidMount() {
-    await this.refreshTodoList();
+  function displayAllTodos() {
+    setToDisplay('all');
   }
 
-  displayAllTodos() {
-    this.setState({
-      todoList: [...this.state.todoList],
-      toDisplay: 'all'
-    });
+  function displayActiveTodos() {
+    setToDisplay('active');
   }
 
-  displayActiveTodos() {
-    this.setState({
-      todoList: [...this.state.todoList],
-      toDisplay: 'active'
-    });
+  function displayCompletedTodos() {
+    setToDisplay('completed');
   }
 
-  displayCompletedTodos() {
-    this.setState({
-      todoList: [...this.state.todoList],
-      toDisplay: 'completed'
-    });
-  }
-
-  async toggleTodoState(id) {
+  async function toggleTodoState(id) {
     async function patchData(url = '', data = {}) {
       // Default options are marked with *
       const response = await fetch(url, {
@@ -131,7 +111,6 @@ class TodoList extends React.Component {
     }
 
     let todoToToggle;
-    let todoList = [...this.state.todoList];
     for (let i = 0; i < todoList.length; i++) {
       if (todoList[i].id === id) {
 	todoToToggle = todoList[i];
@@ -143,40 +122,38 @@ class TodoList extends React.Component {
     });
 
     if (data.message === 'Todo updated!') {
-      await this.refreshTodoList();
+      await refreshTodoList();
     }
   }
 
-  render() {
-    let todoItems;
-    if (this.state.toDisplay === 'all') {
-      todoItems = [...this.state.todoList];
-    } else if (this.state.toDisplay === 'active') {
-      todoItems = this.state.todoList.filter(t => !t.done);
-    } else {
-      todoItems = this.state.todoList.filter(t => t.done);
-    }
+  let todoItems;
+  if (toDisplay === 'all') {
+    todoItems = [...todoList];
+  } else if (toDisplay === 'active') {
+    todoItems = todoList.filter(t => !t.done);
+  } else {
+    todoItems = todoList.filter(t => t.done);
+  }
 
-    return (
-      <div className="todo-list-container">
-	<div className="todo-list">
-	  <AddTodo refreshTodoList={this.refreshTodoList} />
-	  <hr />
-	  <TodoItems
-	    todoItems={todoItems}
-	    toggleTodoState={this.toggleTodoState}
-	    setTodoDeadline={this.setTodoDeadline}
-	  />
-	  <Footer
-	    activeTodosCount={this.state.todoList.filter(t => !t.done).length}
-	    displayAllTodos={this.displayAllTodos}
-	    displayActiveTodos={this.displayActiveTodos}
-	    displayCompletedTodos={this.displayCompletedTodos}
-	  />
-	</div>
+  return (
+    <div className="todo-list-container">
+      <div className="todo-list">
+	<AddTodo refreshTodoList={refreshTodoList} />
+	<hr />
+	<TodoItems
+	  todoItems={todoItems}
+	  toggleTodoState={toggleTodoState}
+	  setTodoDeadline={setTodoDeadline}
+	/>
+	<Footer
+	  activeTodosCount={todoList.filter(t => !t.done).length}
+	  displayAllTodos={displayAllTodos}
+	  displayActiveTodos={displayActiveTodos}
+	  displayCompletedTodos={displayCompletedTodos}
+	/>
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 export default TodoList;

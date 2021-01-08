@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Link
 } from "react-router-dom";
@@ -6,40 +6,20 @@ import {
 import Header from './Header';
 import TodoList from './TodoList/TodoList';
 
-class Home extends React.Component {
-  constructor(props) {
-    super(props);
+function Home(props) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-    this.handleEmailChange = this.handleEmailChange.bind(this);
-    this.handlePasswordChange = this.handlePasswordChange.bind(this);
-    this.handleLogin = this.handleLogin.bind(this);
-
-    this.state = {
-      email: '',
-      password: '',
-    }
+  function handleEmailChange(e) {
+    setEmail(e.target.value);
   }
 
-  handleEmailChange(e) {
-    this.setState({
-      email: e.target.value,
-      password: this.state.password,
-    })
+  function handlePasswordChange(e) {
+    setPassword(e.target.value);
   }
 
-  handlePasswordChange(e) {
-    this.setState({
-      email: this.state.email,
-      password: e.target.value,
-    });
-  }
-
-  async handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
-
-    // TODO:validate
-    // Utils.validateEmail(this.state.firstName)
-    // Utils.validatePassword(this.state.firstName)
 
     async function postData(url = '', data = {}) {
       // Default options are marked with *
@@ -60,47 +40,44 @@ class Home extends React.Component {
     }
 
     const data = await postData(`${process.env.REACT_APP_BASE_API_URL}/login`, {
-      email: this.state.email,
-      password: this.state.password 
+      email,
+      password,
     });
 
     if (data.message === 'Login successful!') {
       localStorage.setItem('user', JSON.stringify({ token: data.token, id: data.id, name: data.name }));
-      this.props.toggleUserLoginStatus(true);
+      props.toggleUserLoginStatus(true);
     }
   }
 
-  render() {
-
-    if (this.props.isUserLoggedIn) {
-      const name = JSON.parse(localStorage.getItem('user')).name;
-      return (
-	<div>
-	  <Header name={name} logout={this.props.logout}/>
-	  <TodoList />
-	</div>
-      );
-    }
+  if (props.isUserLoggedIn) {
+    const name = JSON.parse(localStorage.getItem('user')).name;
     return (
       <div>
-	<form onSubmit={this.handleLogin}>
-	  <div className="form-group">
-	    <label htmlFor="exampleInputEmail1">Email address</label>
-	    <input type="email" value={this.state.email} onChange={this.handleEmailChange} className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email"/>
-	  </div>
-	  <div className="form-group">
-	    <label htmlFor="exampleInputPassword1">Password</label>
-	    <input type="password" value={this.state.password} onChange={this.handlePasswordChange} className="form-control" id="exampleInputPassword1" placeholder="Password"/>
-	  </div>
-	  <button type="submit" className="btn btn-primary">Submit</button>
-	</form>
-	<p>Or</p>
-	<Link to="/signup">
-	  <button className="btn btn-primary">SignUp</button>
-	</Link>
+	<Header name={name} logout={props.logout}/>
+	<TodoList />
       </div>
     );
   }
+  return (
+    <div>
+      <form onSubmit={handleLogin}>
+	<div className="form-group">
+	  <label htmlFor="exampleInputEmail1">Email address</label>
+	  <input type="email" value={email} onChange={handleEmailChange} className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email"/>
+	</div>
+	<div className="form-group">
+	  <label htmlFor="exampleInputPassword1">Password</label>
+	  <input type="password" value={password} onChange={handlePasswordChange} className="form-control" id="exampleInputPassword1" placeholder="Password"/>
+	</div>
+	<button type="submit" className="btn btn-primary">Submit</button>
+      </form>
+      <p>Or</p>
+      <Link to="/signup">
+	<button className="btn btn-primary">SignUp</button>
+      </Link>
+    </div>
+  );
 }
 
 export default Home;

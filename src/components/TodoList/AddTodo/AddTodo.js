@@ -1,22 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-class AddTodo extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      todo: ''
-    }
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+function AddTodo(props) {
+  const [todo, setTodo] = useState('');
+
+  function handleChange(e) {
+    setTodo(e.target.value);
   }
 
-  handleChange(e) {
-    this.setState({
-      todo: e.target.value
-    })
-  }
-
-  async handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
     async function postData(url = '', data = {}) {
@@ -38,36 +29,34 @@ class AddTodo extends React.Component {
       return response.json(); // parses JSON response into native JavaScript objects
     }
 
-    if (this.state.todo) {
+    if (todo) {
       const data = await postData(`${process.env.REACT_APP_BASE_API_URL}/todo/create?userId=${JSON.parse(localStorage.getItem('user')).id}`, {
-	name: this.state.todo
+	name: todo
       });
 
       if (data.message === 'Todo created!') {
-	await this.props.refreshTodoList();
-	this.setState({ todo: '' });
+	await props.refreshTodoList();
+	setTodo('');
       }
     }
   }
 
-  render() {
-    return (
-      <div className="add-todo-container">
-	<form onSubmit={this.handleSubmit}>
-	  <input
-	    type="text"
-	    name="name"
-	    className="add-todo-input"
-	    autoComplete="off"
-	    value={this.state.todo}
-	    placeholder="What needs to be done?"
-	    onChange={this.handleChange}
-	  />
-	  <input type="submit" className="hidden" />
-	</form>
-      </div>
-    );
-  }
+  return (
+    <div className="add-todo-container">
+      <form onSubmit={handleSubmit}>
+	<input
+	  type="text"
+	  name="name"
+	  className="add-todo-input"
+	  autoComplete="off"
+	  value={todo}
+	  placeholder="What needs to be done?"
+	  onChange={handleChange}
+	/>
+	<input type="submit" className="hidden" />
+      </form>
+    </div>
+  );
 }
 
 export default AddTodo;

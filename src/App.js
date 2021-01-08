@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BrowserRouter as Router,
   Switch,
@@ -25,44 +25,30 @@ import SignUp from './components/SignUp.js';
 // 	</TodoList>
 // </TodoApp>
 
-class TodoApp extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isUserLoggedIn: localStorage.getItem('user') ? true : false
-    };
+function TodoApp(props) {
+  const[isUserLoggedIn, setIsUserLoggedIn] = useState(localStorage.getItem('user') ? true : false );
 
-    this.toggleUserLoginStatus = this.toggleUserLoginStatus.bind(this);
-    this.logout = this.logout.bind(this);
+  function toggleUserLoginStatus(isLoggedIn) {
+    setIsUserLoggedIn(isLoggedIn);
   }
 
-  toggleUserLoginStatus(isLoggedIn) {
-    this.setState({
-      isUserLoggedIn: isLoggedIn
-    });
-  }
-
-  logout() {
+  function logout() {
     localStorage.clear();
-    this.setState({
-      isUserLoggedIn: false
-    });
+    setIsUserLoggedIn(false);
   }
 
-  render() {
-    return (
-      <Router>
-	<Switch>
-	  <Route exact path="/">
-	    <Home isUserLoggedIn={this.state.isUserLoggedIn} logout={this.logout} toggleUserLoginStatus={(s) => this.toggleUserLoginStatus(s)} />
-	  </Route>
-	  <Route path="/signup">
-	    {this.state.isUserLoggedIn ? <Redirect to='/' /> : <SignUp toggleUserLoginStatus={(status) => this.toggleUserLoginStatus(status)} />}
-	  </Route>
-	</Switch>
-      </Router>
-    );
-  }
+  return (
+    <Router>
+      <Switch>
+	<Route exact path="/">
+	  <Home isUserLoggedIn={isUserLoggedIn} logout={logout} toggleUserLoginStatus={(s) => toggleUserLoginStatus(s)} />
+	</Route>
+	<Route path="/signup">
+	  {isUserLoggedIn ? <Redirect to='/' /> : <SignUp toggleUserLoginStatus={(status) => toggleUserLoginStatus(status)} />}
+	</Route>
+      </Switch>
+    </Router>
+  );
 }
 
 export default TodoApp;
