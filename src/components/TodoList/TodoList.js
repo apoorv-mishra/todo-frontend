@@ -20,15 +20,15 @@ function TodoList(props) {
     const todos = await Api.getTodos();
     if (todos.length) {
       setTodoList(todos.map(t => {
-	return {
-	  id: t.id,
-	  userId: t.userId,
-	  name: t.name,
-	  done: t.done,
-	  deadline: t.deadline ? new Date(t.deadline): null,
-	  createdAt: new Date(t.createdAt),
-	  updatedAt: new Date(t.updatedAt)
-	}
+        return {
+          id: t.id,
+          userId: t.userId,
+          name: t.name,
+          done: t.done,
+          deadline: t.deadline ? new Date(t.deadline): null,
+          createdAt: new Date(t.createdAt),
+          updatedAt: new Date(t.updatedAt)
+        }
       }));
     }
   }
@@ -58,13 +58,13 @@ function TodoList(props) {
     let todoToToggle;
     for (let i = 0; i < todoList.length; i++) {
       if (todoList[i].id === id) {
-	todoToToggle = todoList[i];
+        todoToToggle = todoList[i];
       }
     }
 
     try {
       await Api.updateTodo(id, {
-	done: !todoToToggle.done
+        done: !todoToToggle.done
       });
       await refreshTodoList();
     } catch(err) {
@@ -84,19 +84,19 @@ function TodoList(props) {
   return (
     <div className="todo-list-container">
       <div className="todo-list">
-	<AddTodo refreshTodoList={refreshTodoList} />
-	<hr />
-	<TodoItems
-	  todoItems={todoItems}
-	  toggleTodoState={toggleTodoState}
-	  setTodoDeadline={setTodoDeadline}
-	/>
-	<Footer
-	  activeTodosCount={todoList.filter(t => !t.done).length}
-	  displayAllTodos={displayAllTodos}
-	  displayActiveTodos={displayActiveTodos}
-	  displayCompletedTodos={displayCompletedTodos}
-	/>
+        <AddTodo refreshTodoList={refreshTodoList} />
+        <hr />
+        <TodoItems
+          todoItems={todoItems}
+          toggleTodoState={toggleTodoState}
+          setTodoDeadline={setTodoDeadline}
+        />
+        <Footer
+          activeTodosCount={todoList.filter(t => !t.done).length}
+          displayAllTodos={displayAllTodos}
+          displayActiveTodos={displayActiveTodos}
+          displayCompletedTodos={displayCompletedTodos}
+        />
       </div>
     </div>
   );
