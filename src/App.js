@@ -10,19 +10,19 @@ import SignUp from './components/SignUp.js';
 
 /* Structure of TodoApp */
 // <TodoApp>
-// 	<Header/>
-// 	<TodoList>
-// 		<AddTodo/>
-// 		<TodoItems>
-// 			<TodoItem/>
-// 			<TodoItem/>
-// 			<TodoItem/>
-// 			.
-// 			.
-// 			.
-// 		</TodoItems>
-// 		<Footer/>
-// 	</TodoList>
+//  <Header/>
+//  <TodoList>
+//    <AddTodo/>
+//    <TodoItems>
+//      <TodoItem/>
+//      <TodoItem/>
+//      <TodoItem/>
+//      .
+//      .
+//      .
+//      </TodoItems>
+//    <Footer/>
+//  </TodoList>
 // </TodoApp>
 
 function TodoApp(props) {
@@ -40,12 +40,12 @@ function TodoApp(props) {
   return (
     <Router>
       <Switch>
-	<Route exact path="/">
-	  <Home isUserLoggedIn={isUserLoggedIn} logout={logout} toggleUserLoginStatus={(s) => toggleUserLoginStatus(s)} />
-	</Route>
-	<Route path="/signup">
-	  {isUserLoggedIn ? <Redirect to='/' /> : <SignUp toggleUserLoginStatus={(status) => toggleUserLoginStatus(status)} />}
-	</Route>
+        <Route exact path="/">
+          <Home isUserLoggedIn={isUserLoggedIn} logout={logout} toggleUserLoginStatus={(s) => toggleUserLoginStatus(s)} />
+        </Route>
+        <Route path="/signup">
+          {isUserLoggedIn ? <Redirect to='/' /> : <SignUp toggleUserLoginStatus={(status) => toggleUserLoginStatus(status)} />}
+        </Route>
       </Switch>
     </Router>
   );

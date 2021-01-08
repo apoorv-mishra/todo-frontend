@@ -7,19 +7,19 @@ class Api {
     const user = JSON.parse(localStorage.getItem('user'));
     try {
       const res = await axios({
-	url: `${this.API_BASE_URL}/todos`,
-	params: {
-	  userId: user.id,
-	},
-	method: 'GET',
-	headers: {
-	  'Content-Type': 'application/json',
-	  'Authorization': `Bearer ${user.token}`
-	},
+        url: `${this.API_BASE_URL}/todos`,
+        params: {
+          userId: user.id,
+        },
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
       });
 
       if (res.data.message === 'Todos!') {
-	return res.data.todos;
+        return res.data.todos;
       }
 
       return [];
@@ -32,16 +32,16 @@ class Api {
     const user = JSON.parse(localStorage.getItem('user'));
     try {
       await axios({
-	url: `${this.API_BASE_URL}/todo/${id}/update`,
-	method: 'PATCH',
-	params: {
-	  userId: user.id
-	},
-	headers: {
-	  'Content-Type': 'application/json',
-	  'Authorization': `Bearer ${user.token}`
-	},
-	data,
+        url: `${this.API_BASE_URL}/todo/${id}/update`,
+        method: 'PATCH',
+        params: {
+          userId: user.id
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        data,
       });
     } catch(err) {
       throw err;
@@ -51,15 +51,15 @@ class Api {
   static async login({ email, password }) {
     try {
       const res = await axios({
-	url: `${this.API_BASE_URL}/login`,
-	method: 'POST',
-	headers: {
-	  'Content-Type': 'application/json',
-	},
-	data: {
-	  email,
-	  password,
-	},
+        url: `${this.API_BASE_URL}/login`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          email,
+          password,
+        },
       });
 
       return res.data;
@@ -71,17 +71,17 @@ class Api {
   static async signup({ firstName, lastName, email, password }) {
     try {
       const res = await axios({
-	url: `${this.API_BASE_URL}/signup`,
-	method: 'POST',
-	headers: {
-	  'Content-Type': 'application/json',
-	},
-	data: {
-	  firstName,
-	  lastName,
-	  email,
-	  password,
-	},
+        url: `${this.API_BASE_URL}/signup`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          firstName,
+          lastName,
+          email,
+          password,
+        },
       });
 
       return res.data;
@@ -94,18 +94,18 @@ class Api {
     const user = JSON.parse(localStorage.getItem('user'));
     try {
       const res = await axios({
-	url: `${this.API_BASE_URL}/todo/create`,
-	method: 'POST',
-	params: {
-	  userId: user.id,
-	},
-	headers: {
-	  'Content-Type': 'application/json',
-	  'Authorization': `Bearer ${user.token}`,
-	},
-	data: {
-	  name
-	},
+        url: `${this.API_BASE_URL}/todo/create`,
+        method: 'POST',
+        params: {
+          userId: user.id,
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`,
+        },
+        data: {
+          name
+        },
       });
 
       return res.data;

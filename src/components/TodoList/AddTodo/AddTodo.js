@@ -11,12 +11,12 @@ function AddTodo(props) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    
+
     try {
       const res = await Api.createTodo({ name: todo })
       if (res.message === 'Todo created!') {
-	await props.refreshTodoList();
-	setTodo('');
+        await props.refreshTodoList();
+        setTodo('');
       }
     } catch(err) {
       throw err;
@@ -26,16 +26,16 @@ function AddTodo(props) {
   return (
     <div className="add-todo-container">
       <form onSubmit={handleSubmit}>
-	<input
-	  type="text"
-	  name="name"
-	  className="add-todo-input"
-	  autoComplete="off"
-	  value={todo}
-	  placeholder="What needs to be done?"
-	  onChange={handleChange}
-	/>
-	<input type="submit" className="hidden" />
+        <input
+          type="text"
+          name="name"
+          className="add-todo-input"
+          autoComplete="off"
+          value={todo}
+          placeholder="What needs to be done?"
+          onChange={handleChange}
+        />
+        <input type="submit" className="hidden" />
       </form>
     </div>
   );
