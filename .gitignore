@@ -26,3 +26,6 @@ yarn-error.log*
 *~
 *.swo
 *.swp
+
+# This file annoys too much!
+.eslintcache
