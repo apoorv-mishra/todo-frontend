@@ -3,6 +3,8 @@ import AddTodo from './AddTodo/AddTodo';
 import TodoItems from './TodoItems/TodoItems';
 import Footer from './Footer/Footer';
 
+import Api from '../../Api.js'
+
 function TodoList(props) {
   const [todoList, setTodoList] = useState([]);
   const [toDisplay, setToDisplay] = useState('all');
@@ -15,27 +17,9 @@ function TodoList(props) {
   }, []);
 
   async function refreshTodoList() {
-    async function getData(url) {
-      // Default options are marked with *
-      const response = await fetch(url, {
-	method: 'GET', // *GET, POST, PUT, DELETE, etc.
-	mode: 'cors', // no-cors, *cors, same-origin
-	cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-	credentials: 'same-origin', // include, *same-origin, omit
-	headers: {
-	  'Content-Type': 'application/json',
-	  'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}`
-	  // 'Content-Type': 'application/x-www-form-urlencoded',
-	},
-	redirect: 'follow', // manual, *follow, error
-	referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-      });
-      return response.json(); // parses JSON response into native JavaScript objects
-    }
-
-    const data = await getData(`${process.env.REACT_APP_BASE_API_URL}/todos?userId=${JSON.parse(localStorage.getItem('user')).id}`);
-    if (data.message === 'Todos!') {
-      setTodoList(data.todos.map(t => {
+    const todos = await Api.getTodos();
+    if (todos.length) {
+      setTodoList(todos.map(t => {
 	return {
 	  id: t.id,
 	  userId: t.userId,
@@ -50,31 +34,11 @@ function TodoList(props) {
   }
 
   async function setTodoDeadline(id, deadline) {
-    async function patchData(url = '', data = {}) {
-      // Default options are marked with *
-      const response = await fetch(url, {
-	method: 'PATCH', // *GET, POST, PUT, DELETE, etc.
-	mode: 'cors', // no-cors, *cors, same-origin
-	cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-	credentials: 'same-origin', // include, *same-origin, omit
-	headers: {
-	  'Content-Type': 'application/json',
-	  'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}`
-	  // 'Content-Type': 'application/x-www-form-urlencoded',
-	},
-	redirect: 'follow', // manual, *follow, error
-	referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-	body: JSON.stringify(data) // body data type must match "Content-Type" header
-      });
-      return response.json(); // parses JSON response into native JavaScript objects
-    }
-
-    const data = await patchData(`${process.env.REACT_APP_BASE_API_URL}/todo/${id}/update?userId=${JSON.parse(localStorage.getItem('user')).id}`, {
-      deadline: deadline 
-    });
-
-    if (data.message === 'Todo updated!') {
+    try {
+      await Api.updateTodo(id, { deadline });
       await refreshTodoList();
+    } catch(err) {
+      throw err;
     }
   }
 
@@ -91,25 +55,6 @@ function TodoList(props) {
   }
 
   async function toggleTodoState(id) {
-    async function patchData(url = '', data = {}) {
-      // Default options are marked with *
-      const response = await fetch(url, {
-	method: 'PATCH', // *GET, POST, PUT, DELETE, etc.
-	mode: 'cors', // no-cors, *cors, same-origin
-	cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-	credentials: 'same-origin', // include, *same-origin, omit
-	headers: {
-	  'Content-Type': 'application/json',
-	  'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}`
-	  // 'Content-Type': 'application/x-www-form-urlencoded',
-	},
-	redirect: 'follow', // manual, *follow, error
-	referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-	body: JSON.stringify(data) // body data type must match "Content-Type" header
-      });
-      return response.json(); // parses JSON response into native JavaScript objects
-    }
-
     let todoToToggle;
     for (let i = 0; i < todoList.length; i++) {
       if (todoList[i].id === id) {
@@ -117,12 +62,13 @@ function TodoList(props) {
       }
     }
 
-    const data = await patchData(`${process.env.REACT_APP_BASE_API_URL}/todo/${id}/update?userId=${JSON.parse(localStorage.getItem('user')).id}`, {
-      done: !todoToToggle.done
-    });
-
-    if (data.message === 'Todo updated!') {
+    try {
+      await Api.updateTodo(id, {
+	done: !todoToToggle.done
+      });
       await refreshTodoList();
+    } catch(err) {
+      throw err;
     }
   }
 
