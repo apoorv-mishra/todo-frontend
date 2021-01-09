@@ -110,6 +110,7 @@ class Api {
 
       return res.data;
     } catch(err) {
+      throw err;
     }
   }
 }
